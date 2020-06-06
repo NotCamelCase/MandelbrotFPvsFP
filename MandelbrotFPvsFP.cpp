@@ -21,43 +21,48 @@ int main()
 
     bool renderResults = true;
     const size_t N = 1;
+#ifdef CPU_MULTITHREADED
+    constexpr bool isMultithreaded = true;
+#else
+    constexpr bool isMultithreaded = false;
+#endif
 
-    std::cout << "CPU SIMD native floating-point\n";
+    std::cout << "CPU " << (isMultithreaded ? "MT " : " ST ") << "scalar native floating-point\n";
     for (size_t i = 0; i < N; i++)
     {
-        // CPU single-threaded scalar native floating-point implementation
-        cpu::RenderMandelbrotSIMD<__m256>(params, cpuNativeSIMDFileName, renderResults);
-    }
-
-    std::cout << "CPU SIMD fixed floating-point\n";
-    for (size_t i = 0; i < N; i++)
-    {
-        // CPU single-threaded scalar native floating-point implementation
-        cpu::RenderMandelbrotSIMD<__m256i>(params, cpuFixedSIMDFileName, renderResults);
-    }
-
-    std::cout << "CPU scalar native floating-point\n";
-    for (size_t i = 0; i < N; i++)
-    {
-        // CPU single-threaded scalar native floating-point implementation
+        // CPU ST/MT scalar native floating-point implementation
         cpu::RenderMandelbrotScalar<float>(params, cpuNativeFPFileName, renderResults);
     }
 
-    std::cout << "GPU native floating-point\n";
+    std::cout << (params.m_UseDiscreteGPU ? "dGPU " : "iGPU ") << "native floating-point\n";
     for (size_t i = 0; i < N; i++)
     {
         // GPU native floating-point implementation
         gpu::RenderMandelbrot(params, "gpgpu-floating-point_comp.spv", gpuNativeFPFileName, renderResults);
     }
 
-    std::cout << "CPU scalar fixed-point\n";
+    std::cout << "CPU " << (isMultithreaded ? "MT " : " ST ") << "scalar fixed-point\n";
     for (size_t i = 0; i < N; i++)
     {
-        // CPU single-threaded scalar fixed-point implementation
+        // CPU ST/MT scalar fixed-point implementation
         cpu::RenderMandelbrotScalar<fixed>(params, cpuFixedPointFileName, renderResults);
     }
 
-    std::cout << "GPU fixed-point\n";
+    std::cout << "CPU " << (isMultithreaded ? "MT " : " ST ") << "SIMD native floating-point\n";
+    for (size_t i = 0; i < N; i++)
+    {
+        // CPU ST/MT scalar native floating-point implementation
+        cpu::RenderMandelbrotSIMD<__m256>(params, cpuNativeSIMDFileName, renderResults);
+    }
+
+    std::cout << "CPU " << (isMultithreaded ? "MT " : " ST ") << " SIMD fixed-point\n";
+    for (size_t i = 0; i < N; i++)
+    {
+        // CPU ST/MT SIMD fixed-point implementation
+        cpu::RenderMandelbrotSIMD<__m256i>(params, cpuFixedSIMDFileName, renderResults);
+    }
+
+    std::cout << (params.m_UseDiscreteGPU ? "dGPU " : "iGPU ") << "fixed-point\n";
     for (size_t i = 0; i < N; i++)
     {
         // GPU native fixed-point implementation
