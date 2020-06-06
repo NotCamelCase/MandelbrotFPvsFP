@@ -17,8 +17,8 @@ layout (binding = 0, r32ui) uniform writeonly uimage2D u_result_image;
 #define LIMITV0 -1.5f
 #define LIMITV1  1.5f
 
-#define WIDTH 480*4
-#define HEIGHT 320*4
+#define WIDTH 1920
+#define HEIGHT 1280
 
 #define fixed int
 #define fixeddw int64_t

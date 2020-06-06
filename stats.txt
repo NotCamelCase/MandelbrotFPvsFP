@@ -14,17 +14,33 @@ CPU mt scalar fixed    480x320 :   4.154604 ms
 CPU mt scalar fixed    960x640 :  13.820376 ms
 CPU mt scalar fixed  1920x1280 :  54.10048 ms
 
-dGPU native     480x320 :   0.595724 ms
-dGPU native     960x640 :   1.021924 ms
-dGPU native   1920x1280 :   2.90154 ms
+CPU st simd native   480x320 :  3.573984 ms
+CPU st simd native   960x640 :  13.7885 ms
+CPU st simd native 1920x1280 :  51.481076 ms
+
+CPU st simd fixed   480x320 :  27.695092  ms
+CPU st simd fixed   960x640 :  110.754 ms
+CPU st simd fixed 1920x1280 :  425.61272 ms
+
+CPU mt simd native   480x320 :  0.724296 ms
+CPU mt simd native   960x640 :  2.873316 ms
+CPU mt simd native 1920x1280 : 10.30528 ms
+			
+CPU mt simd fixed   480x320 :  7.3401  ms
+CPU mt simd fixed   960x640 : 26.784856 ms
+CPU mt simd fixed 1920x1280 : 100.93016 ms
+
+dGPU native     480x320 :  0.595724 ms
+dGPU native     960x640 :  1.021924 ms
+dGPU native   1920x1280 :  2.90154 ms
 
 iGPU native    480x320 :   2.027768 ms
 iGPU native    960x640 :   5.428292 ms
-iGPU native  1920x1280 : 20.173428 ms
+iGPU native  1920x1280 :  20.173428 ms
 
-dGPU fixed     480x320 :  0.8752 ms
-dGPU fixed     960x640 :  1.993308 ms
-dGPU fixed   1920x1280 :  6.943256 ms
+dGPU fixed     480x320 :   0.8752 ms
+dGPU fixed     960x640 :   1.993308 ms
+dGPU fixed   1920x1280 :   6.943256 ms
 
 iGPU fixed     480x320 :   4.408136 ms
 iGPU fixed     960x640 :  16.175264 ms

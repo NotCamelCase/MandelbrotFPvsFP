@@ -4,8 +4,8 @@
 int main()
 {
     const Params params = {
-        480 * 4,                // width
-        320 * 4,                // height
+        1920,                // width
+        1280,                // height
         256,                // maxIterations
         { -2.5f, 1.5f },    // limitsH
         { -1.5f, 1.5f},     // limitsV,
@@ -19,8 +19,8 @@ int main()
     const char* gpuNativeFPFileName = ".\\gpunative-fp.ppm";
     const char* gpuFixedPointFileName = ".\\gpufixedpoint.ppm";
 
-    bool renderResults = false;
-    const size_t N = 25;
+    bool renderResults = true;
+    const size_t N = 1;
 
     std::cout << "CPU SIMD native floating-point\n";
     for (size_t i = 0; i < N; i++)
