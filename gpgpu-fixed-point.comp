@@ -1,0 +1,107 @@
+#version 450
+
+#extension GL_ARB_gpu_shader_int64 : require
+
+// Local workgroup size
+#define LOCAL_SIZE 16
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+layout (binding = 0, r32ui) uniform writeonly uimage2D u_result_image;
+
+#define MAX_ITERATIONS 256
+#define BOUNDARY 4.f
+#define PRECISION 16
+
+#define LIMITH0 -2.5f
+#define LIMITH1  1.5f
+#define LIMITV0 -1.5f
+#define LIMITV1  1.5f
+
+#define WIDTH 480*4
+#define HEIGHT 320*4
+
+#define fixed int
+#define fixeddw int64_t
+#define Real fixed
+
+fixed add(fixed a, fixed b)
+{
+    return a + b;
+}
+
+fixed sub(fixed a, fixed b)
+{
+    return a - b;
+}
+
+fixed mul(fixed a, fixed b)
+{
+    return fixed((fixeddw(a) * fixeddw(b)) >> PRECISION);
+}
+
+fixed div(fixed a, fixed b)
+{
+    return fixed((fixeddw(a) << PRECISION) / fixeddw(b));
+}
+
+fixed init_float(float f)
+{
+    return fixed(f * (1 << PRECISION));
+}
+
+fixed init_uint(uint val)
+{
+    return fixed(val * (1 << PRECISION));
+}
+
+bool less_than(fixed x, fixed y)
+{
+    return x < y;
+}
+
+void main()
+{
+    vec2 pixelCoords = gl_GlobalInvocationID.xy;
+    uint row = uint(pixelCoords.x);
+    uint col = uint(pixelCoords.y);
+
+    // xstep = (h1 - h0) / (float)width
+    Real xStep = div(sub(init_float(LIMITH1), init_float(LIMITH0)), init_uint(WIDTH));
+    // ystep = (v1 - v0) / (float)height
+    Real yStep = div(sub(init_float(LIMITV1), init_float(LIMITV0)), init_uint(HEIGHT));
+
+    // (row * x_step) + x0
+    // (col * y_step) + y0
+    Real x0 = add(mul(xStep, init_uint(row)), init_float(LIMITH0));
+    Real y0 = add(mul(yStep, init_uint(col)), init_float(LIMITV0));
+
+    uint iterations = 0;
+    Real x = init_float(0.f);
+    Real y = init_float(0.f);
+
+    // Escape loop
+    while (true)
+    {
+        // x^2 = x * x
+        // y^2 = y * y
+        Real xSquared = mul(x, x);
+        Real ySquared = mul(y, y);
+
+        if (// x^2 + y^2 < BOUNDARY
+            !less_than(add(xSquared, ySquared), init_float(BOUNDARY)) ||
+            // maxIterations limit
+            ((iterations + 1) >= MAX_ITERATIONS))
+        {
+            break;
+        }
+
+        // y = 2 * x * y + y0
+        // x = x^2 - y^2 + x0
+        y = add(mul(y, mul(init_uint(2), x)), y0);
+        x = add(sub(xSquared, ySquared), x0);
+
+        ++iterations;
+    }
+
+    imageStore(u_result_image, ivec2(pixelCoords), min(uvec4(255), uvec4(iterations)));
+}
