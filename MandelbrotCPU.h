@@ -187,16 +187,12 @@ namespace cpu
         // Extract LH of a & b and pack into 64-bit integers prior to multiplication
         __m256i lha = _mm256_cvtepi32_epi64(_mm256_extractf128_si256(a, 0));
         __m256i lhb = _mm256_cvtepi32_epi64(_mm256_extractf128_si256(b, 0));
-
-        __m256i mulLH = _mm256_mul_epi32(lha, lhb);
-        mulLH = _mm256_srli_epi64(mulLH, g_scFixedPrecision);
+        __m256i mulLH = _mm256_srli_epi64(_mm256_mul_epi32(lha, lhb), g_scFixedPrecision);
 
         // Extract UH of a & b and pack into 64-bit integers prior to multiplication
         __m256i uha = _mm256_cvtepi32_epi64(_mm256_extractf128_si256(a, 1));
         __m256i uhb = _mm256_cvtepi32_epi64(_mm256_extractf128_si256(b, 1));
-
-        __m256i mulUH = _mm256_mul_epi32(uha, uhb);
-        mulUH = _mm256_srli_epi64(mulUH, g_scFixedPrecision);
+        __m256i mulUH = _mm256_srli_epi64(_mm256_mul_epi32(uha, uhb), g_scFixedPrecision);
 
         // There is no way to truncate signed 64-bit integers on AVX2, i.e. as with _mm256_cvtepi64_epi32 in AVX-512,
         // hence, the ugly hack :(
@@ -389,7 +385,7 @@ namespace cpu
 #endif
         for (int32_t col = 0; col < params.m_Height; col++)
         {
-            for (int32_t row = 0; row < params.m_Width; row += 8 /*AVX2 width*/)
+            for (int32_t row = 0; row < params.m_Width; row+=8 /*AVX2 width*/)
             {
                 // ((row + offset) * x_step) + x0
                 // (col * y_step) + y0
