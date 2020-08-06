@@ -385,7 +385,7 @@ namespace cpu
 #endif
         for (int32_t col = 0; col < params.m_Height; col++)
         {
-            for (int32_t row = 0; row < params.m_Width; row+=8 /*AVX2 width*/)
+            for (int32_t row = 0; row < params.m_Width; row += 8 /*AVX2 width*/)
             {
                 // ((row + offset) * x_step) + x0
                 // (col * y_step) + y0

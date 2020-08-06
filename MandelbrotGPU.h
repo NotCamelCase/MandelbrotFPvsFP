@@ -473,6 +473,20 @@ namespace gpu
 
         VK_CHECK(vkBindBufferMemory(pContext->m_Device, pContext->m_ResultBuffer, pContext->m_ResultBufferMemory, 0));
 
+        // Stall the copy until compute is done
+        VkImageMemoryBarrier imageMemoryBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        imageMemoryBarrier.image = pContext->m_StorageImage;
+        imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        imageMemoryBarrier.srcQueueFamilyIndex = imageMemoryBarrier.dstQueueFamilyIndex = pContext->m_QueueFamilyIdx;
+        imageMemoryBarrier.oldLayout = imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+        imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+        imageMemoryBarrier.subresourceRange.layerCount = 1;
+        imageMemoryBarrier.subresourceRange.levelCount = 1;
+        vkCmdPipelineBarrier(pContext->m_CmdBuffer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
         // Copy storage image contents from the device-local memory to host-visible buffer
 
         VkBufferImageCopy copyRegion = {};
@@ -487,8 +501,16 @@ namespace gpu
         copyRegion.bufferOffset = 0;
         copyRegion.bufferRowLength = 0;
         copyRegion.bufferImageHeight = 0;
-
         vkCmdCopyImageToBuffer(pContext->m_CmdBuffer, pContext->m_StorageImage, VK_IMAGE_LAYOUT_GENERAL, pContext->m_ResultBuffer, 1, &copyRegion);
+
+        // Barrier to ensure writes to the buffer are made visible on the host
+        VkBufferMemoryBarrier bufferMemoryBarrier = { VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER };
+        bufferMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        bufferMemoryBarrier.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+        bufferMemoryBarrier.dstQueueFamilyIndex = bufferMemoryBarrier.srcQueueFamilyIndex = pContext->m_QueueFamilyIdx;
+        bufferMemoryBarrier.buffer = pContext->m_ResultBuffer;
+        bufferMemoryBarrier.size = bufferInfo.size;
+        vkCmdPipelineBarrier(pContext->m_CmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 0, nullptr, 1, &bufferMemoryBarrier, 0, nullptr);
     }
 
     void CleanUp(ComputeContext* pContext)
